@@ -4,6 +4,17 @@ import torch.nn.functional as F
 import math
 from typing import List
 
+class LogMelTransform(nn.Module):
+
+    def __init__(self, log_offset: float = 1e-8) -> None:
+        
+        super(LogMelTransform, self).__init__()
+        self.log_offset = log_offset
+
+    def __call__(self, melspectrogram: torch.Tensor) -> torch.Tensor:
+        x = torch.clip(melspectrogram, min=self.log_offset)
+        return torch.log(x)
+
 class ConvBlock(nn.Module):
     def __init__(self, in_channels: int, out_channels: int, kernel_size: List[int], activation: str, momentum: float):
         super(ConvBlock, self).__init__()
@@ -107,63 +118,6 @@ class DecoderBlock(nn.Module):
         # x = self.prune(x)
         x = torch.cat((x, concat_tensor), dim=1)
         x = self.conv_block2(x)
-        return x
-
-
-class EncoderBlockRes1B(nn.Module):
-    def __init__(self, in_channels, out_channels, downsample, activation, momentum):
-        super(EncoderBlockRes1B, self).__init__()
-        size = (3,3)
-
-        self.conv_block1 = ConvBlockRes(in_channels, out_channels, size, activation, momentum)
-        self.conv_block2 = ConvBlockRes(out_channels, out_channels, size, activation, momentum)
-        self.conv_block3 = ConvBlockRes(out_channels, out_channels, size, activation, momentum)
-        self.conv_block4 = ConvBlockRes(out_channels, out_channels, size, activation, momentum)
-        self.downsample = downsample
-
-    def forward(self, x):
-        encoder = self.conv_block1(x)
-        encoder = self.conv_block2(encoder)
-        encoder = self.conv_block3(encoder)
-        encoder = self.conv_block4(encoder)
-        encoder_pool = F.avg_pool2d(encoder, kernel_size=self.downsample)
-        return encoder_pool, encoder
-
-
-class DecoderBlockRes1B(nn.Module):
-    def __init__(self, in_channels, out_channels, stride, activation, momentum):
-        super(DecoderBlockRes1B, self).__init__()
-        size = (3,3)
-        self.activation = activation
-
-        self.conv1 = torch.nn.ConvTranspose2d(in_channels=in_channels,
-            out_channels=out_channels, kernel_size=size, stride=stride,
-            padding=(0, 0), output_padding=(0, 0), bias=False, dilation=1)
-
-        self.bn1 = nn.BatchNorm2d(in_channels)
-        self.conv_block2 = ConvBlockRes(out_channels * 2, out_channels, size, activation, momentum)
-        self.conv_block3 = ConvBlockRes(out_channels, out_channels, size, activation, momentum)
-        self.conv_block4 = ConvBlockRes(out_channels, out_channels, size, activation, momentum)
-        self.conv_block5 = ConvBlockRes(out_channels, out_channels, size, activation, momentum)
-
-    def init_weights(self):
-        init_layer(self.conv1)
-
-    def prune(self, x, both=False):
-        """Prune the shape of x after transpose convolution.
-        """
-        if(both): x = x[:, :, 0 : - 1, 0:-1]
-        else: x = x[:, :, 0: - 1, :]
-        return x
-
-    def forward(self, input_tensor, concat_tensor,both=False):
-        x = self.conv1(F.relu_(self.bn1(input_tensor)))
-        x = self.prune(x,both=both)
-        x = torch.cat((x, concat_tensor), dim=1)
-        x = self.conv_block2(x)
-        x = self.conv_block3(x)
-        x = self.conv_block4(x)
-        x = self.conv_block5(x)
         return x
 
 

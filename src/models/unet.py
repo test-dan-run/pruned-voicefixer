@@ -4,9 +4,6 @@ import torch.nn as nn
 
 from .modules import *
 
-# from tools.pytorch.losses import *
-# from tools.pytorch.pytorch_util import *
-
 class UNetResComplex_100Mb(nn.Module):
     def __init__(self, channels: int, activation: str = 'relu', momentum: float = 0.01, nsrc: int = 1):
         super(UNetResComplex_100Mb, self).__init__()
@@ -95,8 +92,7 @@ class UNetResComplex_100Mb(nn.Module):
         x = F.pad(x, pad=(0, 1))
         x = x[:, :, 0: origin_len, :]
 
-        output_dict = {'mel': x}
-        return output_dict
+        return x
 
 if __name__ == "__main__":
     model = UNetResComplex_100Mb(channels=1)
