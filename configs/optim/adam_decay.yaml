@@ -1,0 +1,6 @@
+num_epochs: 5000
+lr: 5e-4
+lr_decay: 0.9
+betas: [0.5, 0.999]
+warmup_steps: 100
+reduce_lr_every_n_steps: 40000
