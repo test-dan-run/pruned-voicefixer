@@ -1,0 +1,5 @@
+defaults:
+  - dataset: hf_libri
+  - model: unet
+  - optim: adam_decay
+  - run: 1xGPU

@@ -1,0 +1,15 @@
+channels: 1
+activation: relu
+momentum: 0.01
+nsrc: 1
+
+mel:
+  sample_rate: 16000
+  n_fft: 1024
+  n_mels: 128
+  hop_length: 256
+  win_length: 1024
+  f_min: 0.0
+  f_max: 8000.0
+  pad_mode: reflect
+  center: true

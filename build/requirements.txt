@@ -1,0 +1,14 @@
+# audio processing
+SoundFile
+pystoi==0.3.3
+
+# experiment logging
+hydra-core==1.1.1
+pytorch-lightning==1.5.0
+clearml
+boto3
+
+# visualisation
+matplotlib==3.3.4
+pandas==1.1.5
+seaborn==0.11.1

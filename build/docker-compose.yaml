@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+
+  local:
+    stdin_open: true
+    tty: true
+    image: dleongsh/torchaudio:0.9.0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    volumes:
+      - /mnt/d/projects/enh/pruned-voicefixer:/workspace
+      - /mnt/d/datasets/enh/hf_libri:/dataset
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    shm_size: 16gb
+    command: python3 train.py
+
+  tensorboard:
+    stdin_open: true
+    tty: true
+    image: dleongsh/torchaudio:0.9.0
+    ports:
+      - 6006:6006
+    volumes:
+      - /mnt/d/projects/enh/pruned-voicefixer/logs:/logs
+    command: tensorboard --logdir /logs --host 0.0.0.0 --port 6006

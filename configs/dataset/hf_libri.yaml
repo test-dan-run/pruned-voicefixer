@@ -1,0 +1,7 @@
+train_manifest_path: /dataset/wav16k/train/train_enh_manifest.json
+valid_manifest_path: /dataset/wav16k/dev/dev_enh_manifest.json
+test_manifest_path: /dataset/wav16k/test/test_enh_manifest.json
+
+sample_rate: 16000
+segment_length_sec: 4
+random_seed: 42

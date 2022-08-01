@@ -9,13 +9,14 @@ from omegaconf import DictConfig
 
 from .models.modules import LogMelTransform
 from .models.unet import UNetResComplex_100Mb
+from .plotting import plot_spectrogram
 
 class Generator(nn.Module):
-    def __init__(self, num_channels: int, eps: float = 1e-8):
+    def __init__(self, channels: int, eps: float = 1e-8):
         super(Generator, self).__init__()
         self.eps = eps
         self.logmel_transform = LogMelTransform()
-        self.analysis_module = UNetResComplex_100Mb(channels = num_channels)
+        self.analysis_module = UNetResComplex_100Mb(channels = channels)
 
     def forward(self, mel: torch.Tensor):
         '''
@@ -25,20 +26,23 @@ class Generator(nn.Module):
         out = self.analysis_module(logmel)
         return out + logmel
 
+
 class LightningVoiceFixer(pl.LightningModule):
-    def __init__(self, model_cfg: DictConfig, optim_cfg: DictConfig, run_cfg: DictConfig, *args, **kwargs):
+    def __init__(self, model_cfg: DictConfig, optim_cfg: DictConfig, *args, **kwargs):
         super(LightningVoiceFixer, self).__init__()
 
-        self.generator = Generator(model_cfg.num_channels)
+        self.generator = Generator(model_cfg.channels)
         self.melspec_transform = MelSpectrogram(
             sample_rate = model_cfg.mel.sample_rate,
             n_fft = model_cfg.mel.n_fft,
             win_length = model_cfg.mel.win_length,
             hop_length = model_cfg.mel.hop_length,
             n_mels = model_cfg.mel.n_mels,
+            f_min = model_cfg.mel.f_min,
+            f_max = model_cfg.mel.f_max,
             center = model_cfg.mel.center,
             pad_mode = model_cfg.mel.pad_mode,
-            window = model_cfg.mel.window
+            window_fn = torch.hann_window,
         )
         self.logmel_transform = LogMelTransform()
 
@@ -48,7 +52,7 @@ class LightningVoiceFixer(pl.LightningModule):
                                                          gamma = optim_cfg.lr_decay,
                                                          warmup_steps=optim_cfg.warmup_steps,
                                                          reduce_lr_every_n_steps=optim_cfg.reduce_lr_every_n_steps)
-        self.l1loss = torch.nn.L1Loss()
+        self.l1loss = nn.L1Loss()
 
 
     def get_lr_lambda(self, step, gamma, warmup_steps, reduce_lr_every_n_steps):
@@ -112,6 +116,11 @@ class LightningVoiceFixer(pl.LightningModule):
         generated_mels = self(input_mels)
         val_loss = self.l1loss(generated_mels, self.logmel_transform(target_mels))
         self.log("val_loss", val_loss, on_step=False, on_epoch=True, sync_dist=True)
+        if batch_idx % 10 == 0:
+            target_mels_fig = plot_spectrogram(target_mels[0,:,:].cpu().numpy().T)
+            generated_mels_fig = plot_spectrogram(generated_mels[0,:,:].cpu().numpy().T)
+            self.logger.experiment.add_figure(f'Batch {batch_idx} - Clean Melspectrogram', target_mels_fig)
+            self.logger.experiment.add_figure(f'Batch {batch_idx} - Generated Melspectrogram', generated_mels_fig)
 
         return {"loss": val_loss}
 

@@ -1,0 +1,24 @@
+FROM pytorch/pytorch:1.9.0-cuda11.1-cudnn8-runtime
+
+# install necessary packages
+RUN apt-get -y update && apt-get install -y ca-certificates curl gcc build-essential wget git libsndfile1 sox ffmpeg \
+&& rm -rf /var/lib/apt/lists/*
+
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE 1
+
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED 1
+
+# Add requirements and reinstall torch to required version
+RUN pip3 install --upgrade pip
+
+ADD requirements.txt .
+RUN pip3 install --no-cache-dir torchaudio==0.9.0 -f https://download.pytorch.org/whil/torch_stable.html
+RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir https://github.com/vBaiCai/python-pesq/archive/master.zip
+
+WORKDIR "/workspace"
+
+#docker container starts with bash
+RUN ["bash"]
