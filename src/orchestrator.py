@@ -101,8 +101,10 @@ class LightningVoiceFixer(pl.LightningModule):
         input_mels = self.pre(input_signals)
         target_mels = self.pre(target_signals)
 
-        generated_mels = self(input_mels)
-        train_loss = self.l1loss(generated_mels, self.logmel_transform(target_mels))
+        generated_logmels = self(input_mels)
+        target_logmels = self.logmel_transform(target_mels)
+
+        train_loss = self.l1loss(generated_logmels, self.logmel_transform(target_logmels))
 
         self.log("train_loss", train_loss, on_step=True, on_epoch=False, sync_dist=True)
         return {"loss": train_loss}
@@ -113,12 +115,14 @@ class LightningVoiceFixer(pl.LightningModule):
         input_mels = self.pre(input_signals)
         target_mels = self.pre(target_signals)
 
-        generated_mels = self(input_mels)
-        valid_loss = self.l1loss(generated_mels, self.logmel_transform(target_mels))
+        generated_logmels = self(input_mels)
+        target_logmels = self.logmel_transform(target_mels)
+
+        valid_loss = self.l1loss(generated_logmels, self.logmel_transform(target_logmels))
         self.log("valid_loss", valid_loss, on_step=False, on_epoch=True, sync_dist=True)
         if batch_idx % 10 == 0:
-            target_mels_fig = plot_spectrogram(target_mels[0,:,:].cpu().numpy().T)
-            generated_mels_fig = plot_spectrogram(generated_mels[0,:,:].cpu().numpy().T)
+            target_mels_fig = plot_spectrogram(self.logmel_transform(target_mels)[0,0,:,:].cpu().numpy().T)
+            generated_mels_fig = plot_spectrogram(generated_logmels[0,0,:,:].cpu().numpy().T)
             self.logger.experiment.add_figure(f'Batch {batch_idx} - Clean Melspectrogram', target_mels_fig)
             self.logger.experiment.add_figure(f'Batch {batch_idx} - Generated Melspectrogram', generated_mels_fig)
 
