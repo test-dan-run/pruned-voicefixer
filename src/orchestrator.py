@@ -114,15 +114,15 @@ class LightningVoiceFixer(pl.LightningModule):
         target_mels = self.pre(target_signals)
 
         generated_mels = self(input_mels)
-        val_loss = self.l1loss(generated_mels, self.logmel_transform(target_mels))
-        self.log("val_loss", val_loss, on_step=False, on_epoch=True, sync_dist=True)
+        valid_loss = self.l1loss(generated_mels, self.logmel_transform(target_mels))
+        self.log("valid_loss", valid_loss, on_step=False, on_epoch=True, sync_dist=True)
         if batch_idx % 10 == 0:
             target_mels_fig = plot_spectrogram(target_mels[0,:,:].cpu().numpy().T)
             generated_mels_fig = plot_spectrogram(generated_mels[0,:,:].cpu().numpy().T)
             self.logger.experiment.add_figure(f'Batch {batch_idx} - Clean Melspectrogram', target_mels_fig)
             self.logger.experiment.add_figure(f'Batch {batch_idx} - Generated Melspectrogram', generated_mels_fig)
 
-        return {"loss": val_loss}
+        return {"loss": valid_loss}
 
     def configure_optimizers(self):
         optimizer_g = Adam(self.generator.parameters(),
