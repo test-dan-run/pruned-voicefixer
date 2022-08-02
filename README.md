@@ -1,6 +1,27 @@
 # Pruned VoiceFixer
 
-- [] Finish initial working version
+- [x] Finish initial working version
+- [ ] Work on Vocoder - Current candidate: [iSTFTNet](https://github.com/rishikksh20/iSTFTNet-pytorch)
+
+
+## Dataset Manifest
+
+For this repository, we will be adopting the [Nvidia NeMo](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/datasets.html#librispeech)'s manifest format.
+
+```python
+# {'input_filepath': <rel. path to noisy audio file>, 'target_filepath': <rel. path to clean audio file>, ... other params}
+{"input_filepath": "noisy/0/AuXX152x/0_0.wav", "target_filepath": "clean/0/0_0.wav", "speaker_id": "103-1240", "gender": "f"}
+{"input_filepath": "noisy/0/AuXX152x/0_1.wav", "target_filepath": "clean/0/0_1.wav", "speaker_id": "103-1240", "gender": "f"}
+```
+
+## Training
+
+1. Update/add the configs in the config folder for your own dataset and experiment
+2. Run the following command when running locally:
+
+```bash
+python3 train.py
+```
 
 ## References
 ```BibTex
