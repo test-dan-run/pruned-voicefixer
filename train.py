@@ -12,8 +12,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from src.datasets.lightning_datasets import LightningEnhHFLibriDataset
 from src.orchestrator import LightningVoiceFixer
 
-@hydra.main(config_path='configs', config_name='main')
-def main(cfg: DictConfig):
+def train_pipeline(cfg: DictConfig) -> None:
 
     # setup dataset
     data_module = LightningEnhHFLibriDataset(
@@ -45,6 +44,10 @@ def main(cfg: DictConfig):
 
     # train
     trainer.fit(orchestrator, datamodule=data_module)
+
+@hydra.main(config_path='configs', config_name='main')
+def main(cfg: DictConfig):
+    train_pipeline(cfg)
 
 if __name__ == '__main__':
     main()

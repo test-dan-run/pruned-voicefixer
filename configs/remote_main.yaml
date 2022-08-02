@@ -1,0 +1,12 @@
+defaults:
+  - dataset: remote_hf_libri
+  - model: unet
+  - optim: adam_decay
+  - run: 1xGPU
+
+clearml:
+  base_docker_image: dleongsh/torchaudio:1.9.0-cuda11.1-cudnn8-runtime
+  project_name: speech-enhancement/${dataset.name}
+  task_name: ${model.name}
+  output_uri: s3://xx.yy.zz/
+  queue_name: compute

@@ -1,0 +1,17 @@
+name: HF-Libri
+
+train_clearml_id: 
+dev_clearml_id:
+test_clearml_id:
+
+train_manifest_name: train_enh_manifest.json
+dev_manifest_name: dev_enh_manifest.json
+test_manifest_name: test_enh_manifest.json
+
+train_manifest_path: ???
+dev_manifest_path: ???
+test_manifest_path: ???
+
+sample_rate: 16000
+segment_length_sec: 10
+random_seed: 42

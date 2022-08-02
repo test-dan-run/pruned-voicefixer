@@ -1,3 +1,4 @@
+name: voicefixer
 channels: 1
 activation: relu
 momentum: 0.01
