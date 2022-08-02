@@ -1,5 +1,7 @@
 # Pruned VoiceFixer
 
+This is a pruned version of the original VoiceFixer implementation [here](https://github.com/haoheliu/voicefixer_main).
+
 - [x] Finish initial working version
 - [ ] Work on Vocoder - Current candidate: [iSTFTNet](https://github.com/rishikksh20/iSTFTNet-pytorch)
 
